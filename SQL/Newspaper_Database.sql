@@ -5,8 +5,9 @@ DROP TABLE IF EXISTS Illustrates;
 DROP TABLE IF EXISTS Photographer;
 DROP TABLE IF EXISTS Role;
 DROP TABLE IF EXISTS Publishes;
-DROP TABLE IF EXISTS Article;
+DROP TABLE IF EXISTS ArticleEdition;
 DROP TABLE IF EXISTS Edition;
+DROP TABLE IF EXISTS Article;
 DROP TABLE IF EXISTS Photo;
 DROP TABLE IF EXISTS Employee;
 DROP TABLE IF EXISTS Journalist;
@@ -34,7 +35,7 @@ CREATE TABLE Journalist
 	);
     
 CREATE TABLE Article
-    (ArticleTitle   VARCHAR(100),
+    (ArticleTitle   VARCHAR(100) NOT NULL UNIQUE,
      Content        VARCHAR(10000),
      Topic          VARCHAR(50),
      ReadCount      INT,
@@ -43,8 +44,9 @@ CREATE TABLE Article
      FOREIGN KEY(CPR) REFERENCES Journalist(CPR) ON DELETE SET NULL
     );
     
-CREATE TABLE Role 
-	(ArticleTitle VARCHAR(100),
+CREATE TABLE Role (
+     RoleType ENUM('Managing Editor', 'Copy Editor', 'Writer', 'Graphics Designers'),
+     ArticleTitle VARCHAR(100),
 	 CPR CHAR(10),
 	 FOREIGN KEY (CPR) REFERENCES Journalist(CPR) ON DELETE SET NULL,
 	 FOREIGN KEY (ArticleTitle) REFERENCES Article(ArticleTitle) ON DELETE SET NULL
@@ -75,9 +77,20 @@ CREATE TABLE Photographer
      );
 	
 CREATE TABLE Edition(
+	NewspaperTitle VARCHAR(100), 
 	PublishDate DATE NOT NULL UNIQUE,
 	CPR CHAR(10),
-	FOREIGN KEY (CPR) REFERENCES Journalist (CPR) ON DELETE SET NULL
+    PRIMARY KEY(NewspaperTitle, PublishDate),
+    FOREIGN KEY(NewspaperTitle) REFERENCES Newspaper(NewspaperTitle),
+	FOREIGN KEY(CPR) REFERENCES Journalist(CPR) ON DELETE SET NULL
+);
+
+CREATE TABLE ArticleEdition(
+	PublishDate 	DATE,
+    ArticleTitle 	VARCHAR(100),
+    PRIMARY KEY(PublishDate, ArticleTitle),
+    FOREIGN KEY(PublishDate) REFERENCES Edition(PublishDate),
+    FOREIGN KEY(ArticleTitle) REFERENCES Article(ArticleTitle)
 );
 
 CREATE TABLE Employee(
@@ -86,14 +99,4 @@ CREATE TABLE Employee(
     PRIMARY KEY(NewspaperTitle, CPR),
 	FOREIGN KEY (NewspaperTitle) REFERENCES Newspaper (NewspaperTitle),
 	FOREIGN KEY (CPR) REFERENCES Journalist (CPR)
-);
-
-CREATE TABLE Publishes(
-	NewspaperTitle VARCHAR(100),
-	PublishDate DATE,
-	CPR CHAR(10),
-    PRIMARY KEY(NewspaperTitle),
-    FOREIGN KEY(NewspaperTitle) REFERENCES Newspaper(NewspaperTitle),
-	FOREIGN KEY (PublishDate) REFERENCES Edition(PublishDate) ON DELETE SET NULL,
-	FOREIGN KEY (CPR) REFERENCES Journalist(CPR) ON DELETE SET NULL
 );
