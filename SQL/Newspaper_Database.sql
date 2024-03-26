@@ -1,7 +1,6 @@
 USE Newspaper_Database;
 
-DROP TABLE IF EXISTS Newspaper;
-DROP TABLE IF EXISTS Journalist;
+
 DROP TABLE IF EXISTS Illustrates;
 DROP TABLE IF EXISTS Photographer;
 DROP TABLE IF EXISTS Role;
@@ -10,6 +9,8 @@ DROP TABLE IF EXISTS Article;
 DROP TABLE IF EXISTS Edition;
 DROP TABLE IF EXISTS Photo;
 DROP TABLE IF EXISTS Employee;
+DROP TABLE IF EXISTS Journalist;
+DROP TABLE IF EXISTS Newspaper;
 
 CREATE TABLE Newspaper
 (NewspaperTitle VARCHAR (100),
@@ -19,7 +20,7 @@ CREATE TABLE Newspaper
 ); 
 
 CREATE TABLE Journalist 
-	(CPR 			INT NOT NULL,
+	(CPR 			CHAR(10) NOT NULL,
      FirstName  	VARCHAR(25),
      LastName   	VARCHAR(50),
      StreetName 	VARCHAR(100),
@@ -37,17 +38,25 @@ CREATE TABLE Article
      Content        VARCHAR(10000),
      Topic          VARCHAR(50),
      ReadCount      INT,
-     CPR            INT,
+     CPR            CHAR(10),
      PRIMARY KEY(ArticleTitle),
      FOREIGN KEY(CPR) REFERENCES Journalist(CPR) ON DELETE SET NULL
     );
     
 CREATE TABLE Role 
 	(ArticleTitle VARCHAR(100),
-	 CPR INT,
+	 CPR CHAR(10),
 	 FOREIGN KEY (CPR) REFERENCES Journalist(CPR) ON DELETE SET NULL,
 	 FOREIGN KEY (ArticleTitle) REFERENCES Article(ArticleTitle) ON DELETE SET NULL
 	);
+
+CREATE TABLE Photo (
+	PhotoTitle VARCHAR(255),
+	DateTaken DATE,
+	CPR CHAR(10),
+	PRIMARY KEY (PhotoTitle),
+	FOREIGN KEY (CPR) REFERENCES Journalist (CPR) ON DELETE SET NULL
+);
 
 CREATE TABLE Illustrates 
 	(PhotoTitle		VARCHAR(100),
@@ -59,29 +68,21 @@ CREATE TABLE Illustrates
      
 CREATE TABLE Photographer
 	(PhotoTitle		VARCHAR(100),
-	 CPR			INT,
+	 CPR			CHAR(10),
      PRIMARY KEY(PhotoTitle, CPR),
      FOREIGN KEY(PhotoTitle) REFERENCES Photo(PhotoTitle),
      FOREIGN KEY(CPR) REFERENCES Journalist(CPR)
      );
 	
-CREATE TABLE Photo (
-	PhotoTitle VARCHAR(255),
-	DateTaken DATE,
-	CPR INT,
-	PRIMARY KEY (PhotoTitle),
-	FOREIGN KEY (CPR) REFERENCES Journalist (CPR) ON DELETE SET NULL
-);
-
 CREATE TABLE Edition(
 	PublishDate DATE NOT NULL UNIQUE,
-	CPR INT,
+	CPR CHAR(10),
 	FOREIGN KEY (CPR) REFERENCES Journalist (CPR) ON DELETE SET NULL
 );
 
 CREATE TABLE Employee(
 	NewspaperTitle VARCHAR(100),
-	CPR INT,
+	CPR CHAR(10),
     PRIMARY KEY(NewspaperTitle, CPR),
 	FOREIGN KEY (NewspaperTitle) REFERENCES Newspaper (NewspaperTitle),
 	FOREIGN KEY (CPR) REFERENCES Journalist (CPR)
@@ -90,7 +91,7 @@ CREATE TABLE Employee(
 CREATE TABLE Publishes(
 	NewspaperTitle VARCHAR(100),
 	PublishDate DATE,
-	CPR INT,
+	CPR CHAR(10),
     PRIMARY KEY(NewspaperTitle),
     FOREIGN KEY(NewspaperTitle) REFERENCES Newspaper(NewspaperTitle),
 	FOREIGN KEY (PublishDate) REFERENCES Edition(PublishDate) ON DELETE SET NULL,
