@@ -39,17 +39,17 @@ CREATE TABLE Article
      Content        VARCHAR(10000),
      Topic          VARCHAR(50),
      ReadCount      INT,
-     CPR            CHAR(10),
-     PRIMARY KEY(ArticleTitle),
-     FOREIGN KEY(CPR) REFERENCES Journalist(CPR) ON DELETE SET NULL
+
+     PRIMARY KEY(ArticleTitle)
     );
     
 CREATE TABLE Role (
-     RoleType ENUM('Managing Editor', 'Copy Editor', 'Writer', 'Graphics Designers'),
      ArticleTitle VARCHAR(100),
 	 CPR CHAR(10),
-	 FOREIGN KEY (CPR) REFERENCES Journalist(CPR) ON DELETE SET NULL,
-	 FOREIGN KEY (ArticleTitle) REFERENCES Article(ArticleTitle) ON DELETE SET NULL
+     RoleType ENUM('Leader', 'Advisor', 'Writer'),
+     PRIMARY KEY (ArticleTitle, CPR),
+	 FOREIGN KEY (CPR) REFERENCES Journalist(CPR) ON DELETE CASCADE,
+	 FOREIGN KEY (ArticleTitle) REFERENCES Article(ArticleTitle) ON DELETE CASCADE
 	);
 
 CREATE TABLE Photo (
@@ -64,16 +64,16 @@ CREATE TABLE Illustrates
 	(PhotoTitle		VARCHAR(100),
      ArticleTitle	VARCHAR(100),
      PRIMARY KEY(PhotoTitle, ArticleTitle),
-     FOREIGN KEY(PhotoTitle) REFERENCES Photo(PhotoTitle),
-     FOREIGN KEY(ArticleTitle) REFERENCES Article(ArticleTitle)
+     FOREIGN KEY(PhotoTitle) REFERENCES Photo(PhotoTitle) ON DELETE CASCADE,
+     FOREIGN KEY(ArticleTitle) REFERENCES Article(ArticleTitle) ON DELETE CASCADE
      );
      
 CREATE TABLE Photographer
 	(PhotoTitle		VARCHAR(100),
 	 CPR			CHAR(10),
      PRIMARY KEY(PhotoTitle, CPR),
-     FOREIGN KEY(PhotoTitle) REFERENCES Photo(PhotoTitle),
-     FOREIGN KEY(CPR) REFERENCES Journalist(CPR)
+     FOREIGN KEY(PhotoTitle) REFERENCES Photo(PhotoTitle) ON DELETE CASCADE,
+     FOREIGN KEY(CPR) REFERENCES Journalist(CPR) ON DELETE CASCADE
      );
 	
 CREATE TABLE Edition(
@@ -81,22 +81,24 @@ CREATE TABLE Edition(
 	PublishDate DATE NOT NULL UNIQUE,
 	CPR CHAR(10),
     PRIMARY KEY(NewspaperTitle, PublishDate),
-    FOREIGN KEY(NewspaperTitle) REFERENCES Newspaper(NewspaperTitle),
+    FOREIGN KEY(NewspaperTitle) REFERENCES Newspaper(NewspaperTitle) ON DELETE CASCADE,
 	FOREIGN KEY(CPR) REFERENCES Journalist(CPR) ON DELETE SET NULL
 );
 
 CREATE TABLE ArticleEdition(
+	NewspaperTitle VARCHAR(100),
 	PublishDate 	DATE,
     ArticleTitle 	VARCHAR(100),
-    PRIMARY KEY(PublishDate, ArticleTitle),
-    FOREIGN KEY(PublishDate) REFERENCES Edition(PublishDate),
-    FOREIGN KEY(ArticleTitle) REFERENCES Article(ArticleTitle)
+    PRIMARY KEY(NewspaperTitle, PublishDate, ArticleTitle),
+    FOREIGN KEY(NewspaperTitle) REFERENCES Edition(NewspaperTitle) ON DELETE CASCADE,
+    FOREIGN KEY(PublishDate) REFERENCES Edition(PublishDate) ON DELETE CASCADE,
+    FOREIGN KEY(ArticleTitle) REFERENCES Article(ArticleTitle) ON DELETE CASCADE
 );
 
 CREATE TABLE Employee(
 	NewspaperTitle VARCHAR(100),
 	CPR CHAR(10),
     PRIMARY KEY(NewspaperTitle, CPR),
-	FOREIGN KEY (NewspaperTitle) REFERENCES Newspaper (NewspaperTitle),
-	FOREIGN KEY (CPR) REFERENCES Journalist (CPR)
+	FOREIGN KEY (NewspaperTitle) REFERENCES Newspaper (NewspaperTitle) ON DELETE CASCADE,
+	FOREIGN KEY (CPR) REFERENCES Journalist (CPR) ON DELETE CASCADE
 );
