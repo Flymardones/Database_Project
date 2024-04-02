@@ -23,7 +23,6 @@ GROUP BY r.CPR
 ORDER BY TotalReads DESC;
 
 SELECT r.CPR, a.ReadCount AS TotalReads
-
 FROM Role r
 JOIN Article a ON r.ArticleTitle = a.ArticleTitle AND r.RoleType = 'Leader'
 GROUP BY r.CPR
@@ -36,26 +35,22 @@ GROUP BY r.CPR
 ORDER BY TotalReads DESC;
 
 -- Show photographers whose photos were never used more than once
-SELECT DISTINCT j.FirstName, j.LastName, j.CPR
-FROM Journalist j
-JOIN Photographer ph ON j.CPR = ph.CPR
-LEFT JOIN (
-    SELECT PhotoTitle, COUNT(*) AS UsageCount
-    FROM Illustrates
-    GROUP BY PhotoTitle
-) AS u ON ph.PhotoTitle = u.PhotoTitle
-WHERE u.UsageCount <= 1;
+SELECT DISTINCT P.CPR
+FROM Photographer P
+LEFT JOIN Illustrates I ON P.PhotoTitle = I.PhotoTitle
+GROUP BY P.CPR
+HAVING COUNT(I.PhotoTitle) = COUNT(DISTINCT I.ArticleTitle) OR COUNT(I.ArticleTitle) IS NULL;
 
--- Identify which topics, overall, attracted less reads than the average
 
 
 
+-- Identify which topics, overall, attracted less reads than the average
+SELECT AVG(ReadCount) AS AvgReadCount
+FROM Article;
 
 SELECT Topic, AVG(ReadCount) AS AvgReadCount
 FROM Article
-GROUP BY Topic;
-
-SELECT AVG(ReadCount) AS AvgReadCount
-FROM Article;
+GROUP BY Topic
+HAVING AVG(ReadCount) < (SELECT AVG(ReadCount) FROM Article);
 
 -- Identify which journalists were both writers and reporters, having shot at least a photo that was used for a news article they wrote
