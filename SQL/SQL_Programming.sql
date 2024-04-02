@@ -1,1 +1,0 @@
-USE Newspaper_database;
