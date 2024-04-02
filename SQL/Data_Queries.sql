@@ -1,7 +1,7 @@
 USE Newspaper_Database;
 
 -- For each topic, show the most read news article
-SELECT a.*
+SELECT a.ArticleTitle, a.Topic, a.ReadCount
 FROM Article a
 JOIN (
     SELECT Topic, MAX(ReadCount) AS max_view_count
@@ -35,12 +35,21 @@ GROUP BY r.CPR
 ORDER BY TotalReads DESC;
 
 -- Show photographers whose photos were never used more than once
-SELECT DISTINCT P.CPR
-FROM Photographer P
-LEFT JOIN Illustrates I ON P.PhotoTitle = I.PhotoTitle
-GROUP BY P.CPR
-HAVING COUNT(I.PhotoTitle) = COUNT(DISTINCT I.ArticleTitle) OR COUNT(I.ArticleTitle) IS NULL;
+SELECT p.CPR, COUNT(i.PhotoTitle) AS photo_count
+FROM Photographer p
+LEFT JOIN Illustrates i ON p.PhotoTitle = i.PhotoTitle
+GROUP BY p.CPR
+HAVING photo_count <= 1;
 
+-- Add new journalist to show example of query working
+INSERT Journalist VALUE
+('1309001234', 'Test', 'Photographer', 'TestStreetName', 123, 'TestCity', 2620, 'TestCountry', 42335466, 'testmail@test.dk');
+INSERT Photo VALUE
+('TestPhotoTitle', '2023-04-03', '1309001234');
+INSERT Photographer VALUE
+('TestPhotoTitle', '1309001234');
+INSERT Illustrates VALUE
+('TestPhotoTitle', 'Grueling Course comes with horrific conditions');
 
 
 
@@ -48,9 +57,23 @@ HAVING COUNT(I.PhotoTitle) = COUNT(DISTINCT I.ArticleTitle) OR COUNT(I.ArticleTi
 SELECT AVG(ReadCount) AS AvgReadCount
 FROM Article;
 
-SELECT Topic, AVG(ReadCount) AS AvgReadCount
+SELECT Topic, SUM(ReadCount) AS TotalReadCount
 FROM Article
 GROUP BY Topic
-HAVING AVG(ReadCount) < (SELECT AVG(ReadCount) FROM Article);
+HAVING SUM(ReadCount) < (SELECT AVG(ReadCount) FROM Article);
 
 -- Identify which journalists were both writers and reporters, having shot at least a photo that was used for a news article they wrote
+SELECT p.CPR
+FROM Photographer p
+NATURAL JOIN Role r
+WHERE r.RoleType = 'Writer' 
+  AND p.CPR = r.CPR 
+  AND p.PhotoTitle IN (
+    SELECT i.PhotoTitle
+    FROM Illustrates i
+    JOIN Article a ON i.ArticleTitle = a.ArticleTitle
+  )
+GROUP BY p.CPR;
+
+
+
